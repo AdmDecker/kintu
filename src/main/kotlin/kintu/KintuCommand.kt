@@ -1,5 +1,7 @@
 package kintu
 
+import com.sksamuel.hoplite.ConfigLoaderBuilder
+import com.sksamuel.hoplite.addFileSource
 import io.micronaut.configuration.picocli.PicocliRunner
 import picocli.CommandLine.Command
 import picocli.CommandLine.Option
@@ -14,9 +16,17 @@ class KintuCommand : Runnable {
     override fun run() {
         // business logic here
         if (verbose) {
-            println("Hello!")
+            val config = readConfig()
+            println(config.environment)
         }
         else println("Hi!")
+    }
+
+    private fun readConfig(): Config {
+        return ConfigLoaderBuilder.default()
+            .addFileSource("kintu.conf")
+            .build()
+            .loadConfigOrThrow<Config>()
     }
 
     companion object {
@@ -25,3 +35,7 @@ class KintuCommand : Runnable {
         }
     }
 }
+
+data class Config(
+    val environment: String
+)
