@@ -3,6 +3,8 @@ package kintu
 import com.sksamuel.hoplite.ConfigLoaderBuilder
 import com.sksamuel.hoplite.addFileSource
 import io.micronaut.configuration.picocli.PicocliRunner
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 import picocli.CommandLine.*
 import java.io.File
 
@@ -20,7 +22,8 @@ class KintuCommand : Runnable {
         val config = readConfig()
         val fileName = "$kintuFile.kintu"
         val file = File(fileName).readText()
-        println(file)
+        val json = Json.decodeFromString<KintuFile>(file)
+        println(json.topic)
     }
 
     private fun readConfig(): Config {
@@ -39,4 +42,9 @@ class KintuCommand : Runnable {
 
 data class Config(
     val environment: String
+)
+
+@Serializable
+data class KintuFile(
+    val topic: String
 )
