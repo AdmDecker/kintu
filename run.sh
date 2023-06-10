@@ -1,2 +1,2 @@
 ./gradlew runShadow
-./build/install/Kintu-shadow/bin/Kintu -v
+./build/install/Kintu-shadow/bin/Kintu -v test

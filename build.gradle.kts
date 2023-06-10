@@ -4,6 +4,8 @@ plugins {
     id("org.jetbrains.kotlin.plugin.allopen") version "1.8.22"
     id("com.github.johnrengelman.shadow") version "7.1.2"
     id("io.micronaut.application") version "3.7.9"
+
+    kotlin("plugin.serialization") version "1.8.22"
 }
 
 version = "0.1"

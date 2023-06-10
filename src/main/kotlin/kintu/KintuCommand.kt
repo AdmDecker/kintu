@@ -3,8 +3,8 @@ package kintu
 import com.sksamuel.hoplite.ConfigLoaderBuilder
 import com.sksamuel.hoplite.addFileSource
 import io.micronaut.configuration.picocli.PicocliRunner
-import picocli.CommandLine.Command
-import picocli.CommandLine.Option
+import picocli.CommandLine.*
+import java.io.File
 
 @Command(name = "kintu", description = ["..."],
         mixinStandardHelpOptions = true)
@@ -13,13 +13,14 @@ class KintuCommand : Runnable {
     @Option(names = ["-v", "--verbose"], description = ["..."])
     private var verbose : Boolean = false
 
+    @Parameters
+    private var kintuFile: String = ""
+
     override fun run() {
-        // business logic here
-        if (verbose) {
-            val config = readConfig()
-            println(config.environment)
-        }
-        else println("Hi!")
+        val config = readConfig()
+        val fileName = "$kintuFile.kintu"
+        val file = File(fileName).readText()
+        println(file)
     }
 
     private fun readConfig(): Config {
