@@ -10,12 +10,14 @@ import picocli.CommandLine.*
 import java.nio.file.FileSystem
 import java.nio.file.FileSystems
 import java.nio.file.Files
+import java.nio.file.Path
+import kotlin.io.path.exists
 
 @Command(name = "kintu", description = ["..."],
         mixinStandardHelpOptions = true)
 class KintuCommand(
     @Inject val fileSystem: FileSystem = FileSystems.getDefault(),
-    @Inject val kintuProcessor: KintuFileProcessor
+    @Inject val kintuProcessor: KintuFileProcessor = KintuProcessor()
 ) : Runnable {
 
     @Option(names = ["-v", "--verbose"], description = ["..."])
@@ -27,13 +29,24 @@ class KintuCommand(
     override fun run() {
         val config = readConfig()
         if (kintuFile.isNotBlank()) {
-            val fileName = "$kintuFile.kintu"
-            val file = fileSystem.getPath(fileName)
-            val t = Files.readString(file)
+            val workingDir = fileSystem.getPath("").toAbsolutePath()
+
+            val file = getFileOrNull(workingDir)
+            val t = Files.readString(file!!)
             val kintuFile = Json.decodeFromString<KintuFile>(t)
             kintuProcessor.processFile(kintuFile)
         }
+    }
 
+    private fun getFileOrNull(dir: Path): Path? {
+        val fileName = "$kintuFile.kintu"
+        val file = dir.resolve(fileName)
+        if (file.exists()) {
+            return file
+        }
+
+        return if (dir.parent != null) getFileOrNull(dir.parent)
+        else null
     }
 
     private fun readConfig(): Config {
@@ -61,4 +74,10 @@ data class KintuFile(
 
 interface KintuFileProcessor {
     fun processFile(kintuFile: KintuFile)
+}
+
+class KintuProcessor: KintuFileProcessor {
+    override fun processFile(kintuFile: KintuFile) {
+        println(kintuFile.topic)
+    }
 }
