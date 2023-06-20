@@ -25,20 +25,18 @@ class KintuCommandTest {
             content
         )
 
-        val sw = runCommand()
+        runCommand()
 
-        sw.toString() should beEmpty()
+        output.toString() should beEmpty()
     }
 
-    private fun KintuCommandTest.runCommand(): StringWriter {
+    private fun KintuCommandTest.runCommand(): Int {
         val app = KintuCommand(fakeFs)
         val cmd = CommandLine(app)
-        val sw = output
 
-        cmd.err = PrintWriter(sw)
+        cmd.err = PrintWriter(output)
 
-        val exitCode = cmd.execute("kintu")
-        return sw
+        return cmd.execute("kintu")
     }
 
     private fun addTestFile(fileName: String, content: String) {
