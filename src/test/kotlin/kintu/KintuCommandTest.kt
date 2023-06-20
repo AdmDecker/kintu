@@ -1,25 +1,52 @@
 package kintu
 
-import io.micronaut.configuration.picocli.PicocliRunner
-import io.micronaut.context.ApplicationContext
-import io.micronaut.context.env.Environment
+import com.google.common.jimfs.Jimfs
+import io.kotest.matchers.should
+import io.kotest.matchers.string.beEmpty
 import org.junit.jupiter.api.Test
-import java.io.ByteArrayOutputStream
-import java.io.PrintStream
+import picocli.CommandLine
+import java.io.PrintWriter
+import java.io.StringWriter
+import java.nio.file.FileSystem
+import java.nio.file.Files
 
 class KintuCommandTest {
+    private var fakeFs: FileSystem = Jimfs.newFileSystem()
+    private var output: StringWriter = StringWriter()
 
     @Test
-    fun testWithCommandLineOption() {
-        val ctx = ApplicationContext.run(Environment.CLI, Environment.TEST)
-        val baos = ByteArrayOutputStream()
-        System.setOut(PrintStream(baos))
+    fun testHappyPath() {
+        val content =
+            """
+               { "topic": "testTopic" }
+            """
+        addTestFile(
+            "kintu.kintu",
+            content
+        )
 
-        val args = arrayOf("-v")
-        PicocliRunner.run(KintuCommand::class.java, ctx, *args)
+        val sw = runCommand()
 
-        baos.toString()
+        sw.toString() should beEmpty()
+    }
 
-        ctx.close()
+    private fun KintuCommandTest.runCommand(): StringWriter {
+        val app = KintuCommand(fakeFs)
+        val cmd = CommandLine(app)
+        val sw = output
+
+        cmd.err = PrintWriter(sw)
+
+        val exitCode = cmd.execute("kintu")
+        return sw
+    }
+
+    private fun addTestFile(fileName: String, content: String) {
+        val file = fakeFs.getPath(fileName)
+        Files.createFile(file)
+        Files.write(
+            file,
+            content.split("\r?\n|\r".toRegex()).toList()
+        )
     }
 }

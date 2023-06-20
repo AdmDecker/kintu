@@ -3,14 +3,19 @@ package kintu
 import com.sksamuel.hoplite.ConfigLoaderBuilder
 import com.sksamuel.hoplite.addFileSource
 import io.micronaut.configuration.picocli.PicocliRunner
+import jakarta.inject.Inject
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import picocli.CommandLine.*
-import java.io.File
+import java.nio.file.FileSystem
+import java.nio.file.FileSystems
+import java.nio.file.Files
 
 @Command(name = "kintu", description = ["..."],
         mixinStandardHelpOptions = true)
-class KintuCommand : Runnable {
+class KintuCommand(
+    @Inject val fileSystem: FileSystem = FileSystems.getDefault()
+) : Runnable {
 
     @Option(names = ["-v", "--verbose"], description = ["..."])
     private var verbose : Boolean = false
@@ -20,10 +25,14 @@ class KintuCommand : Runnable {
 
     override fun run() {
         val config = readConfig()
-        val fileName = "$kintuFile.kintu"
-        val file = File(fileName).readText()
-        val json = Json.decodeFromString<KintuFile>(file)
-        println(json.topic)
+        if (kintuFile.isNotBlank()) {
+            val fileName = "$kintuFile.kintu"
+            val file = fileSystem.getPath(fileName)
+            val t = Files.readString(file)
+            val json = Json.decodeFromString<KintuFile>(t)
+            println(json.topic)
+        }
+
     }
 
     private fun readConfig(): Config {
