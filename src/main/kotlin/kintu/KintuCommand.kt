@@ -14,7 +14,8 @@ import java.nio.file.Files
 @Command(name = "kintu", description = ["..."],
         mixinStandardHelpOptions = true)
 class KintuCommand(
-    @Inject val fileSystem: FileSystem = FileSystems.getDefault()
+    @Inject val fileSystem: FileSystem = FileSystems.getDefault(),
+    @Inject val kintuProcessor: KintuFileProcessor
 ) : Runnable {
 
     @Option(names = ["-v", "--verbose"], description = ["..."])
@@ -29,8 +30,8 @@ class KintuCommand(
             val fileName = "$kintuFile.kintu"
             val file = fileSystem.getPath(fileName)
             val t = Files.readString(file)
-            val json = Json.decodeFromString<KintuFile>(t)
-            println(json.topic)
+            val kintuFile = Json.decodeFromString<KintuFile>(t)
+            kintuProcessor.processFile(kintuFile)
         }
 
     }
@@ -57,3 +58,7 @@ data class Config(
 data class KintuFile(
     val topic: String
 )
+
+interface KintuFileProcessor {
+    fun processFile(kintuFile: KintuFile)
+}

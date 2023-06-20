@@ -3,6 +3,11 @@ package kintu
 import com.google.common.jimfs.Jimfs
 import io.kotest.matchers.should
 import io.kotest.matchers.string.beEmpty
+import io.mockk.CapturingSlot
+import io.mockk.clearAllMocks
+import io.mockk.every
+import io.mockk.mockk
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import picocli.CommandLine
 import java.io.PrintWriter
@@ -13,6 +18,16 @@ import java.nio.file.Files
 class KintuCommandTest {
     private var fakeFs: FileSystem = Jimfs.newFileSystem()
     private var output: StringWriter = StringWriter()
+    private var processCaptureSlot = CapturingSlot<KintuFile>()
+    private val mockKintuProcessor = mockk<KintuFileProcessor>(relaxed = true)
+
+    @BeforeEach
+    fun beforeEach() {
+        clearAllMocks()
+        every {
+            mockKintuProcessor.processFile(capture(processCaptureSlot))
+        } answers { nothing }
+    }
 
     @Test
     fun testHappyPath() {
@@ -31,7 +46,7 @@ class KintuCommandTest {
     }
 
     private fun KintuCommandTest.runCommand(): Int {
-        val app = KintuCommand(fakeFs)
+        val app = KintuCommand(fakeFs, mockKintuProcessor)
         val cmd = CommandLine(app)
 
         cmd.err = PrintWriter(output)

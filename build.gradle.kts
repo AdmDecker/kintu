@@ -38,6 +38,7 @@ dependencies {
     compileOnly("org.graalvm.nativeimage:svm")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
     testImplementation("com.google.jimfs:jimfs:1.2")
+    testImplementation("io.mockk:mockk:1.13.5")
 }
 
 application {
