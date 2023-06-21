@@ -12,6 +12,7 @@ version = "0.1"
 group = "kintu"
 
 val kotestVersion="5.6.2"
+val kafkaVersion="3.5.0"
 val javaVersion="19"
 
 val kotlinVersion=project.properties.get("kotlinVersion")
@@ -39,6 +40,9 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
     testImplementation("com.google.jimfs:jimfs:1.2")
     testImplementation("io.mockk:mockk:1.13.5")
+    implementation("org.apache.kafka:kafka-clients:$kafkaVersion")
+    implementation("org.apache.kafka:kafka-streams:$kafkaVersion")
+    implementation("org.apache.kafka:connect-runtime:$kafkaVersion")
 }
 
 application {

@@ -85,15 +85,11 @@ data class Config(
 
 @Serializable
 data class KintuFile(
-    val topic: String
+    val topic: String,
+    val payload: String
 )
 
 interface KintuFileProcessor {
     fun processFile(config: Config, kintuFile: KintuFile)
 }
 
-class KintuProcessor: KintuFileProcessor {
-    override fun processFile(config: Config, kintuFile: KintuFile) {
-        println(kintuFile.topic)
-    }
-}
