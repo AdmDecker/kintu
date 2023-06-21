@@ -27,21 +27,27 @@ class KintuCommand(
     @Parameters
     private var kintuFile: String = ""
 
+    @Spec
+    lateinit var spec: Model.CommandSpec
+
     override fun run() {
         val config = readConfig()
         if (config != null) {
             if (kintuFile.isNotBlank()) {
                 val file = getFileOrNull("$kintuFile.kintu")
-                val t = Files.readString(file!!)
-                val kintuFile = Json.decodeFromString<KintuFile>(t)
-                kintuProcessor.processFile(config, kintuFile)
+                if (file != null) {
+                    val t = Files.readString(file)
+                    val kintuFile = Json.decodeFromString<KintuFile>(t)
+                    kintuProcessor.processFile(config, kintuFile)
+                }
             }
         }
+        else spec.commandLine().err.println(
+            "Missing kintu.config. Run 'kintu init' to generate")
     }
 
     private fun getFileOrNull(fileName: String): Path? {
         val workingDir = fileSystem.getPath("").toAbsolutePath()
-
         return climbForFile(workingDir, fileName)
     }
 

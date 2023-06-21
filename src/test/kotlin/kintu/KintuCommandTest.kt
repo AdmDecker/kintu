@@ -17,6 +17,7 @@ import java.nio.file.Files
 class KintuCommandTest {
     private lateinit var fakeFs: FileSystem
     private var err: StringWriter = StringWriter()
+    private var out: StringWriter = StringWriter()
     private var capturedConfig = CapturingSlot<Config>()
     private var capturedKintuFile = CapturingSlot<KintuFile>()
     private val mockKintuProcessor = mockk<KintuFileProcessor>(relaxed = true)
@@ -39,34 +40,60 @@ class KintuCommandTest {
 
     @Test
     fun testHappyPath() {
-        addTestFile("kintu.conf", "environment=myenv")
+        givenTypicalConfig()
         givenTypicalTestFile()
 
         whenCommandExecuted()
 
-        err.toString() should beEmpty()
+        noErrorsShouldBeOutput()
         kintuProcessorShouldHaveBeenCalled()
-        capturedKintuFile.captured.topic shouldBeEqual "testTopic"
-        capturedConfig.captured.environment shouldBeEqual "myenv"
     }
 
     @Test
     fun testFileInParentDirectory() {
         givenTypicalTestFileInParentDirectory()
+        givenTypicalConfig()
 
         whenCommandExecuted()
 
+        noErrorsShouldBeOutput()
+        kintuProcessorShouldHaveBeenCalled()
+    }
+
+    @Test
+    fun testConfigInParentDirectory() {
+        givenTypicalConfigInParentDirectory()
+        givenTypicalTestFile()
+
+        whenCommandExecuted()
+
+        noErrorsShouldBeOutput()
+    }
+
+    @Test
+    fun testMissingConfig() {
+        whenCommandExecuted()
+
+        out.toString() shouldBeEqual "p"
+    }
+
+    private fun givenTypicalConfigInParentDirectory() {
+        addTestFile("/home/kintu.conf", configFileContent)
+    }
+
+    private fun noErrorsShouldBeOutput() {
         err.toString() should beEmpty()
+    }
+
+    private fun givenTypicalConfig() {
+        addTestFile("kintu.conf", configFileContent)
     }
 
     private fun kintuProcessorShouldHaveBeenCalled() {
         verify(exactly = 1) { mockKintuProcessor.processFile(any(), any()) }
+        capturedKintuFile.captured.topic shouldBeEqual "testTopic"
+        capturedConfig.captured.environment shouldBeEqual "myenv"
     }
-
-    private val typicalFileContent: String =
-        """
-           { "topic": "testTopic" }
-        """
 
     private fun givenTypicalTestFile() {
         addTestFile(
@@ -87,6 +114,7 @@ class KintuCommandTest {
         val cmd = CommandLine(app)
 
         cmd.err = PrintWriter(err)
+        cmd.out = PrintWriter(out)
 
         return cmd.execute("kintu")
     }
@@ -100,3 +128,10 @@ class KintuCommandTest {
         )
     }
 }
+
+private const val typicalFileContent: String =
+    """
+        { "topic": "testTopic" }
+    """
+
+private const val configFileContent = "environment=myenv"
