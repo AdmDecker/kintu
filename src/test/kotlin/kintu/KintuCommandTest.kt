@@ -5,6 +5,7 @@ import com.google.common.jimfs.Jimfs
 import io.kotest.matchers.equals.shouldBeEqual
 import io.kotest.matchers.should
 import io.kotest.matchers.string.beEmpty
+import io.kotest.matchers.string.shouldContain
 import io.mockk.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -74,7 +75,7 @@ class KintuCommandTest {
     fun testMissingConfig() {
         whenCommandExecuted()
 
-        out.toString() shouldBeEqual "p"
+        err.toString() shouldContain "Missing kintu.config. Run 'kintu init' to generate"
     }
 
     private fun givenTypicalConfigInParentDirectory() {
