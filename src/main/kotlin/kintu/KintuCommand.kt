@@ -1,7 +1,7 @@
 package kintu
 
 import com.sksamuel.hoplite.ConfigLoaderBuilder
-import com.sksamuel.hoplite.addFileSource
+import com.sksamuel.hoplite.addStreamSource
 import io.micronaut.configuration.picocli.PicocliRunner
 import jakarta.inject.Inject
 import kotlinx.serialization.Serializable
@@ -12,6 +12,7 @@ import java.nio.file.FileSystems
 import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.io.path.exists
+import kotlin.io.path.inputStream
 
 @Command(name = "kintu", description = ["..."],
         mixinStandardHelpOptions = true)
@@ -28,32 +29,41 @@ class KintuCommand(
 
     override fun run() {
         val config = readConfig()
-        if (kintuFile.isNotBlank()) {
-            val workingDir = fileSystem.getPath("").toAbsolutePath()
-
-            val file = getFileOrNull(workingDir)
-            val t = Files.readString(file!!)
-            val kintuFile = Json.decodeFromString<KintuFile>(t)
-            kintuProcessor.processFile(kintuFile)
+        if (config != null) {
+            if (kintuFile.isNotBlank()) {
+                val file = getFileOrNull("$kintuFile.kintu")
+                val t = Files.readString(file!!)
+                val kintuFile = Json.decodeFromString<KintuFile>(t)
+                kintuProcessor.processFile(config, kintuFile)
+            }
         }
     }
 
-    private fun getFileOrNull(dir: Path): Path? {
-        val fileName = "$kintuFile.kintu"
+    private fun getFileOrNull(fileName: String): Path? {
+        val workingDir = fileSystem.getPath("").toAbsolutePath()
+
+        return climbForFile(workingDir, fileName)
+    }
+
+
+    private fun climbForFile(dir: Path, fileName: String): Path? {
         val file = dir.resolve(fileName)
         if (file.exists()) {
             return file
         }
 
-        return if (dir.parent != null) getFileOrNull(dir.parent)
+        return if (dir.parent != null) climbForFile(dir.parent, fileName)
         else null
     }
 
-    private fun readConfig(): Config {
-        return ConfigLoaderBuilder.default()
-            .addFileSource("kintu.conf")
-            .build()
-            .loadConfigOrThrow<Config>()
+    private fun readConfig(): Config? {
+        val configFile = getFileOrNull("kintu.conf")?.inputStream()
+        return if (configFile != null) {
+            return ConfigLoaderBuilder.default()
+                .addStreamSource(configFile, "conf")
+                .build()
+                .loadConfigOrThrow<Config>()
+        } else null
     }
 
     companion object {
@@ -73,11 +83,11 @@ data class KintuFile(
 )
 
 interface KintuFileProcessor {
-    fun processFile(kintuFile: KintuFile)
+    fun processFile(config: Config, kintuFile: KintuFile)
 }
 
 class KintuProcessor: KintuFileProcessor {
-    override fun processFile(kintuFile: KintuFile) {
+    override fun processFile(config: Config, kintuFile: KintuFile) {
         println(kintuFile.topic)
     }
 }

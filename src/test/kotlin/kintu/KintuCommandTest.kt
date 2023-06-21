@@ -17,6 +17,7 @@ import java.nio.file.Files
 class KintuCommandTest {
     private lateinit var fakeFs: FileSystem
     private var err: StringWriter = StringWriter()
+    private var capturedConfig = CapturingSlot<Config>()
     private var capturedKintuFile = CapturingSlot<KintuFile>()
     private val mockKintuProcessor = mockk<KintuFileProcessor>(relaxed = true)
     private var workingDirectory = "/home/work"
@@ -25,7 +26,9 @@ class KintuCommandTest {
     fun beforeEach() {
         clearAllMocks()
         every {
-            mockKintuProcessor.processFile(capture(capturedKintuFile))
+            mockKintuProcessor.processFile(
+                capture(capturedConfig),
+                capture(capturedKintuFile))
         } answers { nothing }
 
         val configuration = Configuration.unix().toBuilder()
@@ -36,6 +39,7 @@ class KintuCommandTest {
 
     @Test
     fun testHappyPath() {
+        addTestFile("kintu.conf", "environment=myenv")
         givenTypicalTestFile()
 
         whenCommandExecuted()
@@ -43,6 +47,7 @@ class KintuCommandTest {
         err.toString() should beEmpty()
         kintuProcessorShouldHaveBeenCalled()
         capturedKintuFile.captured.topic shouldBeEqual "testTopic"
+        capturedConfig.captured.environment shouldBeEqual "myenv"
     }
 
     @Test
@@ -55,7 +60,7 @@ class KintuCommandTest {
     }
 
     private fun kintuProcessorShouldHaveBeenCalled() {
-        verify(exactly = 1) { mockKintuProcessor.processFile(any()) }
+        verify(exactly = 1) { mockKintuProcessor.processFile(any(), any()) }
     }
 
     private val typicalFileContent: String =
@@ -77,7 +82,7 @@ class KintuCommandTest {
         )
     }
 
-    private fun KintuCommandTest.whenCommandExecuted(): Int {
+    private fun whenCommandExecuted(): Int {
         val app = KintuCommand(fakeFs, mockKintuProcessor)
         val cmd = CommandLine(app)
 
@@ -86,8 +91,8 @@ class KintuCommandTest {
         return cmd.execute("kintu")
     }
 
-    private fun addTestFile(fileName: String, content: String) {
-        val file = fakeFs.getPath(fileName)
+    private fun addTestFile(path: String, content: String) {
+        val file = fakeFs.getPath(path)
         Files.createFile(file)
         Files.write(
             file,
