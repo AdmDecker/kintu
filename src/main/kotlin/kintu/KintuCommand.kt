@@ -6,6 +6,7 @@ import io.micronaut.configuration.picocli.PicocliRunner
 import jakarta.inject.Inject
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
 import picocli.CommandLine.*
 import java.nio.file.FileSystem
 import java.nio.file.FileSystems
@@ -16,10 +17,9 @@ import kotlin.io.path.inputStream
 
 @Command(name = "kintu", description = ["..."],
         mixinStandardHelpOptions = true)
-class KintuCommand(
-    @Inject val fileSystem: FileSystem = FileSystems.getDefault(),
-    @Inject val kintuProcessor: KintuFileProcessor = KintuProcessor()
-) : Runnable {
+class KintuCommand : Runnable {
+    var fileSystem: FileSystem = FileSystems.getDefault()
+    @Inject lateinit var kintuProcessor: KintuFileProcessor
 
     @Option(names = ["-v", "--verbose"], description = ["..."])
     private var verbose : Boolean = false
@@ -80,13 +80,14 @@ class KintuCommand(
 }
 
 data class Config(
-    val environment: String
+    val environment: String,
+    val servers: String
 )
 
 @Serializable
 data class KintuFile(
     val topic: String,
-    val payload: String
+    val payload: JsonObject
 )
 
 interface KintuFileProcessor {

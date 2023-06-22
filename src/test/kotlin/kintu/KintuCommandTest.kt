@@ -111,7 +111,9 @@ class KintuCommandTest {
     }
 
     private fun whenCommandExecuted(): Int {
-        val app = KintuCommand(fakeFs, mockKintuProcessor)
+        val app = KintuCommand()
+        app.kintuProcessor = mockKintuProcessor
+        app.fileSystem = fakeFs
         val cmd = CommandLine(app)
 
         cmd.err = PrintWriter(err)
@@ -132,7 +134,15 @@ class KintuCommandTest {
 
 private const val typicalFileContent: String =
     """
-        { "topic": "testTopic" }
+        { 
+            "topic": "testTopic",
+            "payload": {
+                "something": "else"
+            }
+        }
     """
 
-private const val configFileContent = "environment=myenv"
+private const val configFileContent = """
+    environment=myenv
+    servers="http://localhost:9092"
+"""

@@ -1,3 +1,6 @@
 {
     "topic": "test-topic"
+    "payload": {
+        "lol": "haha"
+    }
 }
