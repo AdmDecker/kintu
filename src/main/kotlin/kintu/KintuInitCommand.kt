@@ -6,7 +6,7 @@ import java.nio.file.FileSystems
 import kotlin.io.path.createFile
 import kotlin.io.path.writeText
 
-@Command(name = "init")
+@Command(name = "init", description = ["initialize kintu with a kintu.conf file"])
 class KintuInitCommand: Runnable {
     var fileSystem: FileSystem = FileSystems.getDefault()
 

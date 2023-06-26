@@ -8,15 +8,16 @@ import kotlin.io.path.createFile
 import kotlin.io.path.exists
 import kotlin.io.path.writeText
 
-@Command(name = "new")
+@Command(name = "new",
+    description = ["generate a new .kintu file with placeholder values"])
 class KintuNewCommand: Runnable {
     @Parameters
     private var kintuFile: String = ""
 
     var fileSystem: FileSystem = FileSystems.getDefault()
 
-    private val fileAlreadyExistsErrorMessage =
-        "$kintuFile.conf already exists. Use a different name"
+    private val fileAlreadyExistsErrorMessage: String
+        get() = "$kintuFile.conf already exists. Use a different name"
 
     override fun run() {
         val path = fileSystem.getPath("$kintuFile.kintu")

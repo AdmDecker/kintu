@@ -15,7 +15,7 @@ import java.io.StringWriter
 import java.nio.file.FileSystem
 import java.nio.file.Files
 
-class KintuCommandTest {
+class KintuEmitCommandTest {
     private lateinit var fakeFs: FileSystem
     private var err: StringWriter = StringWriter()
     private var out: StringWriter = StringWriter()
@@ -111,7 +111,7 @@ class KintuCommandTest {
     }
 
     private fun whenCommandExecuted(): Int {
-        val app = KintuCommand()
+        val app = KintuEmitCommand()
         app.kintuProcessor = mockKintuProcessor
         app.fileSystem = fakeFs
         val cmd = CommandLine(app)
@@ -144,5 +144,7 @@ private const val typicalFileContent: String =
 
 private const val configFileContent = """
     environment=myenv
-    kafka.servers="http://localhost:9092"
+    kafka {
+        "bootstrap.servers": "http://localhost:9092"
+    }
 """

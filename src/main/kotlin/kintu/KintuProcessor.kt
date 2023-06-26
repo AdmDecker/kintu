@@ -4,7 +4,10 @@ import com.jayway.jsonpath.JsonPath
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import org.apache.kafka.clients.producer.KafkaProducer
-import org.apache.kafka.clients.producer.ProducerConfig.*
+import org.apache.kafka.clients.producer.ProducerConfig.ACKS_CONFIG
+import org.apache.kafka.clients.producer.ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG
+import org.apache.kafka.clients.producer.ProducerConfig.MAX_BLOCK_MS_CONFIG
+import org.apache.kafka.clients.producer.ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.clients.producer.RecordMetadata
 import org.apache.kafka.common.serialization.StringSerializer
@@ -46,7 +49,7 @@ class KafkaClient : EventBrokerClient {
             MAX_BLOCK_MS_CONFIG to 300
         )
 
-        val props = defaultProps + config.kafkaConfig
+        val props = defaultProps + config.kafka
         KafkaProducer<String, String>(props).use {
             it.send(
                 ProducerRecord(topic, payload)
