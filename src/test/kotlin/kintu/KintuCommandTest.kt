@@ -144,5 +144,5 @@ private const val typicalFileContent: String =
 
 private const val configFileContent = """
     environment=myenv
-    servers="http://localhost:9092"
+    kafka.servers="http://localhost:9092"
 """

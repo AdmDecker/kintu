@@ -1,5 +1,6 @@
 package kintu
 
+import com.sksamuel.hoplite.ConfigAlias
 import com.sksamuel.hoplite.ConfigLoaderBuilder
 import com.sksamuel.hoplite.addStreamSource
 import io.micronaut.configuration.picocli.PicocliRunner
@@ -81,12 +82,17 @@ class KintuCommand : Runnable {
 
 data class Config(
     val environment: String,
+    @ConfigAlias("kafka") val kafkaConfig: KafkaConfig
+)
+
+data class KafkaConfig(
     val servers: String
 )
 
 @Serializable
 data class KintuFile(
     val topic: String,
+    val randomize: List<String>? = null,
     val payload: JsonObject
 )
 

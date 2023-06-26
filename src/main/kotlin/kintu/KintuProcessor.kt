@@ -1,19 +1,33 @@
 package kintu
 
+import com.jayway.jsonpath.JsonPath
 import jakarta.inject.Inject
 import jakarta.inject.Singleton
-import kotlinx.serialization.json.Json
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerConfig.*
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.clients.producer.RecordMetadata
 import org.apache.kafka.common.serialization.StringSerializer
+import java.util.*
+
 
 @Singleton
 class KintuProcessor( @Inject val eventClient: EventBrokerClient): KintuFileProcessor {
     override fun processFile(config: Config, kintuFile: KintuFile) {
-        val payload = Json
-        eventClient.sendMessage(config, kintuFile.topic, kintuFile.payload.toString())
+        val json = if (kintuFile.randomize != null) {
+            randomizeJsonPaths(kintuFile, kintuFile.randomize)
+        }
+        else kintuFile.payload.toString()
+
+        eventClient.sendMessage(config, kintuFile.topic, json)
+    }
+
+    private fun randomizeJsonPaths(kintuFile: KintuFile, randomize: List<String>): String {
+        var json = JsonPath.parse(kintuFile.payload.toString())
+        for (jsonPath in randomize) {
+            json = json.set(jsonPath, UUID.randomUUID().toString().replace("-", ""))
+        }
+        return json.jsonString()
     }
 
 }
@@ -29,7 +43,7 @@ class KafkaClient : EventBrokerClient {
             ACKS_CONFIG to "all",
             KEY_SERIALIZER_CLASS_CONFIG to StringSerializer::class.qualifiedName,
             VALUE_SERIALIZER_CLASS_CONFIG to StringSerializer::class.qualifiedName,
-            BOOTSTRAP_SERVERS_CONFIG to config.servers,
+            BOOTSTRAP_SERVERS_CONFIG to config.kafkaConfig.servers,
             MAX_BLOCK_MS_CONFIG to 300
         )
         KafkaProducer<String, String>(properties).use {

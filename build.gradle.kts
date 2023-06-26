@@ -15,7 +15,7 @@ val kotestVersion="5.6.2"
 val kafkaVersion="3.5.0"
 val javaVersion="19"
 
-val kotlinVersion=project.properties.get("kotlinVersion")
+val kotlinVersion= project.properties["kotlinVersion"]
 repositories {
     mavenCentral()
 }
@@ -43,6 +43,7 @@ dependencies {
     implementation("org.apache.kafka:kafka-clients:$kafkaVersion")
     implementation("org.apache.kafka:kafka-streams:$kafkaVersion")
     implementation("org.apache.kafka:connect-runtime:$kafkaVersion")
+    implementation("com.jayway.jsonpath:json-path:2.8.0")
 }
 
 application {
