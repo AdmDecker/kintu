@@ -1,11 +1,43 @@
-## Micronaut 3.9.2 Documentation
+## Kintu - Welcome
 
-- [User Guide](https://docs.micronaut.io/3.9.2/guide/index.html)
-- [API Reference](https://docs.micronaut.io/3.9.2/api/index.html)
-- [Configuration Reference](https://docs.micronaut.io/3.9.2/guide/configurationreference.html)
-- [Micronaut Guides](https://guides.micronaut.io/index.html)
----
+Kintu stands for Kafka Integrated Test Utility
 
-- [Shadow Gradle Plugin](https://plugins.gradle.org/plugin/com.github.johnrengelman.shadow)
-- [Micronaut Gradle Plugin documentation](https://micronaut-projects.github.io/micronaut-gradle-plugin/latest/)
-- [GraalVM Gradle Plugin documentation](https://graalvm.github.io/native-build-tools/latest/gradle-plugin.html)
+Currently only JSON payloads are supported.
+
+Kintu enables developers to save kafka test events in their project repo, emit those events on demand, and randomize specified fields to bypass idempotency checks
+
+### Commands
+
+- kintu init
+  - Initializes your repo with a kintu.conf file. 
+  - This is where your Kafka config should go.
+  - Kintu will climb up the folder structure to find the nearest kafka config, so only create one per file tree
+- kintu new \<name>
+  - Creates a new kintu file for defining a kafka payload
+- kintu emit \<name>
+  - Emits an existing kafka payload from a .kintu file
+
+### Kintu File
+
+- The kintu file is a JSON file containing some metadata along with the message payload
+
+It looks like this:
+
+    { 
+        "topic": "test-topic"
+        "randomize": []
+        "payload": {
+            "sample": "payload"
+        }
+    }
+
+- topic: The Kafka topic to send the message to
+- randomize: an array of JSON paths to randomize.  Select the properties you want to randomize using [Jayway JSON Path syntax](https://github.com/json-path/JsonPath)
+- payload: The payload that will be sent to the Kafka topic
+
+
+### Feature Wishlist
+
+- Multiple environment selection
+- Other event broker support such as Kinesis or Azure Messaging Services
+- Support for non-JSON payloads
