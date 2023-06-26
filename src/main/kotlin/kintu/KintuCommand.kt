@@ -17,7 +17,11 @@ import kotlin.io.path.exists
 import kotlin.io.path.inputStream
 
 @Command(name = "kintu", description = ["..."],
-        mixinStandardHelpOptions = true)
+        mixinStandardHelpOptions = true,
+        subcommands = [
+            KintuInitCommand::class,
+            KintuNewCommand::class
+        ])
 class KintuCommand : Runnable {
     var fileSystem: FileSystem = FileSystems.getDefault()
     @Inject lateinit var kintuProcessor: KintuFileProcessor
@@ -35,7 +39,7 @@ class KintuCommand : Runnable {
         val config = readConfig()
         if (config != null) {
             if (kintuFile.isNotBlank()) {
-                val file = getFileOrNull("$kintuFile.kintu")
+                val file = FileGetter(fileSystem).getFileOrNull("$kintuFile.kintu")
                 if (file != null) {
                     val t = Files.readString(file)
                     val kintuFile = Json.decodeFromString<KintuFile>(t)
@@ -47,24 +51,8 @@ class KintuCommand : Runnable {
             "Missing kintu.config. Run 'kintu init' to generate")
     }
 
-    private fun getFileOrNull(fileName: String): Path? {
-        val workingDir = fileSystem.getPath("").toAbsolutePath()
-        return climbForFile(workingDir, fileName)
-    }
-
-
-    private fun climbForFile(dir: Path, fileName: String): Path? {
-        val file = dir.resolve(fileName)
-        if (file.exists()) {
-            return file
-        }
-
-        return if (dir.parent != null) climbForFile(dir.parent, fileName)
-        else null
-    }
-
     private fun readConfig(): Config? {
-        val configFile = getFileOrNull("kintu.conf")?.inputStream()
+        val configFile = FileGetter(fileSystem).getFileOrNull("kintu.conf")?.inputStream()
         return if (configFile != null) {
             return ConfigLoaderBuilder.default()
                 .addStreamSource(configFile, "conf")
@@ -80,13 +68,26 @@ class KintuCommand : Runnable {
     }
 }
 
+class FileGetter(val fileSystem: FileSystem) {
+    fun getFileOrNull(fileName: String): Path? {
+        val workingDir = fileSystem.getPath("").toAbsolutePath()
+        return climbForFile(workingDir, fileName)
+    }
+
+    private fun climbForFile(dir: Path, fileName: String): Path? {
+        val file = dir.resolve(fileName)
+        if (file.exists()) {
+            return file
+        }
+
+        return if (dir.parent != null) climbForFile(dir.parent, fileName)
+        else null
+    }
+}
+
 data class Config(
     val environment: String,
-    @ConfigAlias("kafka") val kafkaConfig: KafkaConfig
-)
-
-data class KafkaConfig(
-    val servers: String
+    @ConfigAlias("kafka") val kafkaConfig: Map<String, String>
 )
 
 @Serializable

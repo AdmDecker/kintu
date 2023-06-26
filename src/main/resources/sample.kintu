@@ -1,0 +1,7 @@
+{
+    "topic": "test-topic"
+    "randomize": []
+    "payload": {
+        "sample": "payload"
+    }
+}

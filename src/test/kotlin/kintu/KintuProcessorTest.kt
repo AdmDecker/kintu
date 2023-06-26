@@ -14,7 +14,7 @@ class KintuProcessorTest {
     private val capturedEventMessage = CapturingSlot<String>()
     private val eventBrokerClient: EventBrokerClient =
         mockk<EventBrokerClient>(relaxed = true)
-    private var config: Config = Config("", KafkaConfig(""))
+    private var config: Config = Config("", mapOf())
     private var kintuFile = KintuFile("", null, JsonObject(mapOf()))
 
     @Test
@@ -40,7 +40,9 @@ class KintuProcessorTest {
     }
 
     private fun givenStandardConfig() {
-        config = Config("some-environment", KafkaConfig("http://localhost:9092"))
+        config = Config(
+            "some-environment",
+            mapOf("bootstrap.servers" to "http://localhost:9092"))
     }
 
     private fun givenStandardKintuFile() {

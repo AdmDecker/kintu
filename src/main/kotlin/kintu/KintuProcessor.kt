@@ -39,14 +39,15 @@ interface EventBrokerClient {
 @Singleton
 class KafkaClient : EventBrokerClient {
     override fun sendMessage(config: Config, topic: String, payload: String) {
-        val properties = mapOf(
+        val defaultProps = mapOf(
             ACKS_CONFIG to "all",
             KEY_SERIALIZER_CLASS_CONFIG to StringSerializer::class.qualifiedName,
             VALUE_SERIALIZER_CLASS_CONFIG to StringSerializer::class.qualifiedName,
-            BOOTSTRAP_SERVERS_CONFIG to config.kafkaConfig.servers,
             MAX_BLOCK_MS_CONFIG to 300
         )
-        KafkaProducer<String, String>(properties).use {
+
+        val props = defaultProps + config.kafkaConfig
+        KafkaProducer<String, String>(props).use {
             it.send(
                 ProducerRecord(topic, payload)
             ) { m: RecordMetadata, e: Exception? ->
