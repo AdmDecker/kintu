@@ -1,7 +1,8 @@
 package kintu
 
-import io.micronaut.configuration.picocli.PicocliRunner
+import picocli.CommandLine
 import picocli.CommandLine.Command
+import kotlin.system.exitProcess
 
 
 @Command(name = "kintu", description = ["..."],
@@ -14,7 +15,8 @@ import picocli.CommandLine.Command
 class KintuCommand {
     companion object {
         @JvmStatic fun main(args: Array<String>) {
-            PicocliRunner.execute(KintuCommand::class.java, *args)
+            val exitCode: Int = CommandLine(KintuCommand()).execute(*args)
+            exitProcess(exitCode)
         }
     }
 }

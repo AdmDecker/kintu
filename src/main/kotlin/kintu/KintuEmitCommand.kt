@@ -2,7 +2,6 @@ package kintu
 
 import com.sksamuel.hoplite.ConfigLoaderBuilder
 import com.sksamuel.hoplite.addStreamSource
-import jakarta.inject.Inject
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
@@ -21,7 +20,7 @@ import kotlin.io.path.inputStream
         mixinStandardHelpOptions = true)
 class KintuEmitCommand : Runnable {
     var fileSystem: FileSystem = FileSystems.getDefault()
-    @Inject lateinit var kintuProcessor: KintuFileProcessor
+    var kintuProcessor: KintuFileProcessor = KintuProcessor(KafkaClient())
 
     @Spec
     lateinit var spec: Model.CommandSpec

@@ -3,7 +3,7 @@ plugins {
     id("org.jetbrains.kotlin.kapt") version "1.8.22"
     id("org.jetbrains.kotlin.plugin.allopen") version "1.8.22"
     id("com.github.johnrengelman.shadow") version "7.1.2"
-    id("io.micronaut.application") version "3.7.9"
+    id("org.graalvm.buildtools.native") version "0.9.23"
 
     kotlin("plugin.serialization") version "1.8.22"
 }
@@ -14,6 +14,7 @@ group = "kintu"
 val kotestVersion="5.6.2"
 val kafkaVersion="3.5.0"
 val javaVersion="19"
+val picocliVerson="4.7.4"
 
 val kotlinVersion= project.properties["kotlinVersion"]
 repositories {
@@ -21,22 +22,17 @@ repositories {
 }
 
 dependencies {
-    kapt("info.picocli:picocli-codegen")
-    implementation("info.picocli:picocli")
-    implementation("io.micronaut:micronaut-jackson-databind")
-    implementation("io.micronaut.kotlin:micronaut-kotlin-runtime")
-    implementation("io.micronaut.picocli:micronaut-picocli")
-    implementation("jakarta.annotation:jakarta.annotation-api")
+    kapt("info.picocli:picocli-codegen:$picocliVerson")
+    implementation("info.picocli:picocli:$picocliVerson")
+    implementation("jakarta.annotation:jakarta.annotation-api:2.1.1")
     implementation("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}")
     implementation("com.sksamuel.hoplite:hoplite-core:2.7.4")
     implementation("com.sksamuel.hoplite:hoplite-hocon:2.7.4")
-    runtimeOnly("ch.qos.logback:logback-classic")
     runtimeOnly("com.fasterxml.jackson.module:jackson-module-kotlin")
-    testImplementation("io.micronaut:micronaut-http-client")
     testImplementation("io.kotest:kotest-runner-junit5:$kotestVersion")
     testImplementation("io.kotest:kotest-assertions-core:$kotestVersion")
-    compileOnly("org.graalvm.nativeimage:svm")
+    compileOnly("org.graalvm.nativeimage:svm:23.0.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
     testImplementation("com.google.jimfs:jimfs:1.2")
     testImplementation("io.mockk:mockk:1.13.5")
@@ -46,9 +42,6 @@ dependencies {
     implementation("com.jayway.jsonpath:json-path:2.8.0")
 }
 
-application {
-    mainClass.set("kintu.KintuCommand")
-}
 java {
     sourceCompatibility = JavaVersion.toVersion(javaVersion)
 }
@@ -65,13 +58,9 @@ tasks {
         }
     }
 }
-micronaut {
-    testRuntime("junit5")
-    processing {
-        incremental(true)
-        annotations("kintu.*")
+
+tasks.withType<Jar> {
+    manifest {
+        attributes["Main-Class"] = "kintu.KintuCommand"
     }
 }
-
-
-

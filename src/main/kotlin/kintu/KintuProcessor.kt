@@ -1,8 +1,6 @@
 package kintu
 
 import com.jayway.jsonpath.JsonPath
-import jakarta.inject.Inject
-import jakarta.inject.Singleton
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerConfig.ACKS_CONFIG
 import org.apache.kafka.clients.producer.ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG
@@ -14,8 +12,7 @@ import org.apache.kafka.common.serialization.StringSerializer
 import java.util.*
 
 
-@Singleton
-class KintuProcessor( @Inject val eventClient: EventBrokerClient): KintuFileProcessor {
+class KintuProcessor( val eventClient: EventBrokerClient): KintuFileProcessor {
     override fun processFile(config: Config, kintuFile: KintuFile) {
         val json = if (kintuFile.randomize != null) {
             randomizeJsonPaths(kintuFile, kintuFile.randomize)
@@ -39,7 +36,6 @@ interface EventBrokerClient {
     fun sendMessage(config: Config, topic: String, payload: String)
 }
 
-@Singleton
 class KafkaClient : EventBrokerClient {
     override fun sendMessage(config: Config, topic: String, payload: String) {
         val defaultProps = mapOf(
