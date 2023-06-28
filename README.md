@@ -8,7 +8,7 @@ Kintu enables developers to save kafka test events in their project repo, emit t
 
 ### Installation
 
-Automatic installation is currently via [Homebrew](brew.sh)
+Automatic installation is currently available via [Homebrew](brew.sh)
 
 > brew install admdecker/admdecker/kintu
 
