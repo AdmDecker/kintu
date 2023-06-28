@@ -6,6 +6,12 @@ Currently only JSON payloads are supported.
 
 Kintu enables developers to save kafka test events in their project repo, emit those events on demand, and randomize specified fields to bypass idempotency checks
 
+### Installation
+
+Automatic installation is currently via [Homebrew](brew.sh)
+
+> brew install admdecker/admdecker/kintu
+
 ### Commands
 
 - kintu init
